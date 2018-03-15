@@ -1,5 +1,43 @@
 /** Token object */
 class Token implements Cloneable {
+    /* Token flags. TF = Token Flag. */
+    
+    /** Token flag "none". */
+    public static final int TF_NONE             = 0;
+    /** Token flag "begins line". */
+    public static final int TF_BEGINS_LINE  	= 1; 
+    /** Token flag "ends line". */
+    public static final int TF_ENDS_LINE      	= (1 << 1); 
+    /** Token flag "allows case modifications of reserved words". */
+    public static final int TF_RESERVED_WORDS_ON= (1 << 2); 
+    /** Token flag "allows case modifications of directives". */
+    public static final int TF_DIRECTIVES_ON	= (1 << 3); 
+    /** Token flag "allows case modifications of identifiers". */
+    public static final int TF_IDENTIFIERS_ON   = (1 << 4); 
+    /** Token flag "allows inserting of spaces to appropriate places". */
+    public static final int TF_INSERT_SPACES_ON	= (1 << 5); 
+    /** Token flag "allows indentation". */
+    public static final int TF_INDENT_ON        = (1 << 6); 
+    /** Token flag "allows word wrap". */
+    public static final int TF_WRAP_ON          = (1 << 7); 
+    /** Token flag "allows inserting blank lines". */
+    public static final int TF_BLANK_LINES_ON   = (1 << 8); 
+    
+    
+    /** Text. */
+    private String text;
+    /** Class. */
+    private String klass;
+    /** Flags. */
+    private int flags;
+    /** Row where it begins (indexed from 0). */
+    private int row;
+    /** Column where it begins (indexed from 0). */
+    private int col;
+    /** Reference to the previous token in the linked list. */
+    private Token prev;
+    /** Reference to the next token in the linked list. */
+    private Token next;
 
     /**
      * @return the text
@@ -98,93 +136,49 @@ class Token implements Cloneable {
     public void setNext(Token next) {
         this.next = next;
     }
-
-  /* Token flags. TF = Token Flag. */
-
-  /** Token flag "none". */
-  public static final int TF_NONE               = 0;
-  /** Token flag "begins line". */
-  public static final int TF_BEGINS_LINE  	= (1 << 0); 
-  /** Token flag "ends line". */
-  public static final int TF_ENDS_LINE      	= (1 << 1); 
-  /** Token flag "allows case modifications of reserved words". */
-  public static final int TF_RESERVED_WORDS_ON  = (1 << 2); 
-  /** Token flag "allows case modifications of directives". */
-  public static final int TF_DIRECTIVES_ON	= (1 << 3); 
-  /** Token flag "allows case modifications of identifiers". */
-  public static final int TF_IDENTIFIERS_ON     = (1 << 4); 
-  /** Token flag "allows inserting of spaces to appropriate places". */
-  public static final int TF_INSERT_SPACES_ON	= (1 << 5); 
-  /** Token flag "allows indentation". */
-  public static final int TF_INDENT_ON         = (1 << 6); 
-  /** Token flag "allows word wrap". */
-  public static final int TF_WRAP_ON           = (1 << 7); 
-  /** Token flag "allows inserting blank lines". */
-  public static final int TF_BLANK_LINES_ON    = (1 << 8); 
-  
-  
-  private int flags;
-  /** Row where it begins (indexed from 0). */
-  private int row;
-  /** Column where it begins (indexed from 0). */
-  private int col;
-  /** Reference to the previous token in the linked list. */
-  private Token prev;
-  /** Reference to the next token in the linked list. */
-  private Token next;
-
      
-  /**
-   * Does the token match given class and text?
-   * 
-   * @param aClass class
-   * @param aText text
-   * @return <code>true</code> if token matches the given class and text;
-   *         <code>false</code> if token does not match the given class and text 
-   */  
-  boolean match(String aClass, String aText) {
-    return getKlass().equals(aClass) &&
-           getText().equalsIgnoreCase(aText);
-  }
-  
-  /**
-   * Creates the clone of the object.
-   *
-   * @return clone of the object
-   */
-  public Object clone() {
-    return new Token(getText(), getKlass(), getFlags(), getRow(), getCol(), null, null);
-  }
-  
+    /**
+     * Does the token match given class and text?
+     * 
+     * @param aClass class
+     * @param aText text
+     * @return <code>true</code> if token matches the given class and text;
+     *         <code>false</code> if token does not match the given class and text 
+     */  
+    boolean match(String aClass, String aText) {
+        return getKlass().equals(aClass) &&
+               getText().equalsIgnoreCase(aText);
+    }
 
+    /**
+     * Creates the clone of the object.
+     *
+     * @return clone of the object
+     */
+    public Object clone() {
+        return new Token(getText(), getKlass(), getFlags(), getRow(), getCol(), null, null);
+    }
 
-  /**
-   * Creates token according to the given parameters.
-   * 
-   * @param text text
-   * @param klass class
-   * @param flags flags
-   * @param row row where it begins (indexed from 0)
-   * @param col column where it begins (indexed from 0)
-   * @param prev reference to the previous token in the linked list
-   * @param next reference to the next token in the linked list
-   */
-  public Token(String text, String klass, int flags, int row, int col, Token prev, Token next) {
-    this.text  = text;
-    this.klass = klass;
-    this.flags = flags;
-    this.row   = row;
-    this.col   = col;
-    this.prev  = prev;
-    this.next  = next;  
-  }
-  
-  /** Text. */
-  private String text;
-  /** Class. */
-  private String klass;
-  /** Flags. */
- 
+    /**
+     * Creates token according to the given parameters.
+     * 
+     * @param text text
+     * @param klass class
+     * @param flags flags
+     * @param row row where it begins (indexed from 0)
+     * @param col column where it begins (indexed from 0)
+     * @param prev reference to the previous token in the linked list
+     * @param next reference to the next token in the linked list
+     */
+    public Token(String text, String klass, int flags, int row, int col, Token prev, Token next) {
+        this.text  = text;
+        this.klass = klass;
+        this.flags = flags;
+        this.row   = row;
+        this.col   = col;
+        this.prev  = prev;
+        this.next  = next;  
+    }
 }
 /** Ensures correct indentation. */
 public class Indent {
