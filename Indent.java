@@ -1,6 +1,104 @@
 /** Token object */
 class Token implements Cloneable {
 
+    /**
+     * @return the text
+     */
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * @param text the text to set
+     */
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    /**
+     * @return the klass
+     */
+    public String getKlass() {
+        return klass;
+    }
+
+    /**
+     * @param klass the klass to set
+     */
+    public void setKlass(String klass) {
+        this.klass = klass;
+    }
+
+    /**
+     * @return the flags
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * @param flags the flags to set
+     */
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    /**
+     * @return the row
+     */
+    public int getRow() {
+        return row;
+    }
+
+    /**
+     * @param row the row to set
+     */
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    /**
+     * @return the col
+     */
+    public int getCol() {
+        return col;
+    }
+
+    /**
+     * @param col the col to set
+     */
+    public void setCol(int col) {
+        this.col = col;
+    }
+
+    /**
+     * @return the prev
+     */
+    public Token getPrev() {
+        return prev;
+    }
+
+    /**
+     * @param prev the prev to set
+     */
+    public void setPrev(Token prev) {
+        this.prev = prev;
+    }
+
+    /**
+     * @return the next
+     */
+    public Token getNext() {
+        return next;
+    }
+
+    /**
+     * @param next the next to set
+     */
+    public void setNext(Token next) {
+        this.next = next;
+    }
+
   /* Token flags. TF = Token Flag. */
 
   /** Token flag "none". */
@@ -25,15 +123,15 @@ class Token implements Cloneable {
   public static final int TF_BLANK_LINES_ON    = (1 << 8); 
   
   
-  public int flags;
+  private int flags;
   /** Row where it begins (indexed from 0). */
-  public int row;
+  private int row;
   /** Column where it begins (indexed from 0). */
-  public int col;
+  private int col;
   /** Reference to the previous token in the linked list. */
-  public Token prev;
+  private Token prev;
   /** Reference to the next token in the linked list. */
-  public Token next;
+  private Token next;
 
      
   /**
@@ -45,8 +143,8 @@ class Token implements Cloneable {
    *         <code>false</code> if token does not match the given class and text 
    */  
   boolean match(String aClass, String aText) {
-    return klass.equals(aClass) &&
-           text.equalsIgnoreCase(aText);
+    return getKlass().equals(aClass) &&
+           getText().equalsIgnoreCase(aText);
   }
   
   /**
@@ -55,7 +153,7 @@ class Token implements Cloneable {
    * @return clone of the object
    */
   public Object clone() {
-    return new Token(text, klass, flags, row, col, null, null);
+    return new Token(getText(), getKlass(), getFlags(), getRow(), getCol(), null, null);
   }
   
 
@@ -82,9 +180,9 @@ class Token implements Cloneable {
   }
   
   /** Text. */
-  public String text;
+  private String text;
   /** Class. */
-  public String klass;
+  private String klass;
   /** Flags. */
  
 }
@@ -214,9 +312,9 @@ public class Indent {
   private static Token skipWhitespaceAndComments(Token start) {
     Token t;
     for (
-      t = start.next;
-      t != null && (t.klass.equals("whitespace") || t.klass.equals("comment"));
-      t = t.next
+      t = start.getNext();
+      t != null && (t.getKlass().equals("whitespace") || t.getKlass().equals("comment"));
+      t = t.getNext()
     );return t;
   } 
 
@@ -237,9 +335,9 @@ public class Indent {
     for (
       t = token;
       t != null && 
-           (t.klass != klass || 
-	    !t.text.equalsIgnoreCase(text));
-      t = t.next
+           (t.getKlass() != klass || 
+	    !t.getText().equalsIgnoreCase(text));
+      t = t.getNext()
     );return t;
   }
 
@@ -253,8 +351,8 @@ public class Indent {
   static void changeColUntilEOL(Token start, int delta) {
     Token token;
 
-    for (token = start; token != null && token.row == start.row; token = token.next) {
-      token.col += delta;
+    for (token = start; token != null && token.getRow() == start.getRow(); token = token.getNext()) {
+        token.setCol(token.getCol() + delta);
     }
   }
 
@@ -268,8 +366,8 @@ public class Indent {
   static void changeRowUntilEOF(int delta, Token start) {
     Token token;
 
-    for (token = start; token != null; token = token.next) {
-      token.row += delta;
+    for (token = start; token != null; token = token.getNext()) {
+        token.setRow(token.getRow() + delta);
     }
   }
   
@@ -284,38 +382,37 @@ public class Indent {
 
 	int step;
 
-    if (token.next != null) {
-      for (; token != null && (token.flags & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE; token = token.next)
+    if (token.getNext() != null) {
+      for (; token != null && (token.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE; token = token.getNext())
         ;
 
       int hlpr = 0;
-      if (token != null && token.next != null ) {
-  		  hlpr= token.next.flags;
+      if (token != null && token.getNext() != null ) {
+  		  hlpr= token.getNext().getFlags();
   	}
       
 	step = 1;
       while (   step < 4) {
     	  
-    	  if (token != null && token.next != null ) {
-    		  token.flags = token.flags & (token.next.flags ^ (~hlpr));
+    	  if (token != null && token.getNext() != null ) {
+              token.setFlags(token.getFlags() & (token.getNext().getFlags() ^ (~hlpr)));
     	  }
     	  
 	switch (step) {
 	  case 1:
-	    if (token == null || token.next == null) { return; } 
-	    if ((token.next.flags & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) return;
+	    if (token == null || token.getNext() == null) { return; } 
+	    if ((token.getNext().getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) return;
 	    break;
 
 	  case 2:
 	    newToken = new Token("\n", "whitespace",
-	      ((token.next.flags & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE | Token.TF_ENDS_LINE,
-	      token.next.row, 0, token, token.next);
+	      ((token.getNext().getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE | Token.TF_ENDS_LINE, token.getNext().getRow(), 0, token, token.getNext());
             break;
 
 	  case 3:
-	    changeRowUntilEOF(1, token.next);
-	    token.next.prev = newToken;
-	    token.next = newToken;
+	    changeRowUntilEOF(1, token.getNext());
+            token.getNext().setPrev(newToken);
+            token.setNext(newToken);
 	    break;
 	}
 	step++;
@@ -337,26 +434,26 @@ public class Indent {
 
     result = start;
 
-    if (start.klass.equals("whitespace")) {
-      if ((start.flags & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
+    if (start.getKlass().equals("whitespace")) {
+      if (( start.getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
         /* do nothing, we are done */
       } else {
-        if (start.text.length() == l) {
+        if (    start.getText().length() == l) {
           /* do nothing, we are done */
         } else if (l > 0) {
-          delta = l - start.text.length();
-          start.text = "";
+          delta = l - start.getText().length();
+          start.setText("");
           for (int i = 1; i <= l; i++)
-            start.text += " "; 
-          changeColUntilEOL(start.next, delta);
+              start.setText(start.getText() + " "); 
+          changeColUntilEOL(start.getNext(), delta);
         } else {
           /*delta = -start.col;*/
-          delta = -(int)start.text.length();
-          if (start.prev != null) start.prev.next = start.next;
-          if (start.next != null) start.next.prev = start.prev;
-          start.next.flags |= Token.TF_BEGINS_LINE;
-          changeColUntilEOL(start.next, delta);
-          result = start.next;
+          delta = -(int)start.getText().length();
+          if (      start.getPrev() != null) start.getPrev().setNext(start.getNext());
+          if (      start.getNext() != null) start.getNext().setPrev(start.getPrev());
+          start.getNext().setFlags(start.getNext().getFlags() | Token.TF_BEGINS_LINE);
+          changeColUntilEOL(start.getNext(), delta);
+          result =  start.getNext();
         }
       }
     } else if (l > 0) {
@@ -364,12 +461,11 @@ public class Indent {
       for (int i = 1; i <= l; i++)
         text += ' ';
       newToken = new Token(text, "whitespace",
-        ((start.flags & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE,
-        start.row, start.col, start.prev, start);
+        ((  start.getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE, start.getRow(), start.getCol(), start.getPrev(), start);
       changeColUntilEOL(start, l);
-      if (start.prev != null) start.prev.next = newToken;
-      start.prev = newToken;
-      start.flags &= ~Token.TF_BEGINS_LINE;
+      if (  start.getPrev() != null) start.getPrev().setNext(newToken);
+      start.setPrev(newToken);
+      start.setFlags(start.getFlags() & ~Token.TF_BEGINS_LINE);
     } else {
       /* do nothing, we are done */
     }
@@ -386,19 +482,19 @@ public class Indent {
     Token token, t, first;
     
 
-    for (token = tokens; token != null; token = token.next)
-      if (token.klass.equals("comment")) {
+    for (token = tokens; token != null; token = token.getNext())
+      if (  token.getKlass().equals("comment")) {
 
         /* First we find out if the comment is standalone */
         boolean isStandalone = true;
         first = token;
-        if ((token.flags & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
-          for (t = token.prev; t != null; t = t.prev)
-            if (!t.klass.equals("whitespace")) {
+        if ((   token.getFlags() & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
+          for (t =  token.getPrev(); t != null; t = t.getPrev())
+            if (!t.getKlass().equals("whitespace")) {
               isStandalone = false;
               break;
             } else {
-              if ((t.flags & Token.TF_BEGINS_LINE) == Token.TF_BEGINS_LINE) {
+              if ((         t.getFlags() & Token.TF_BEGINS_LINE) == Token.TF_BEGINS_LINE) {
                 first = t;
                 break;
               }
@@ -407,13 +503,13 @@ public class Indent {
         if (!isStandalone) continue;
 
         /* Now we find something to which the comment could relate. */
-        for (t = token.next; t != null && (t.klass.equals("comment") || t.klass.equals("whitespace")); t = t.next)
+        for (t = token.getNext(); t != null && (t.getKlass().equals("comment") || t.getKlass().equals("whitespace")); t = t.getNext())
           ;
 
         if (t == null || t.match("reserved-word", "end")
           || t.match("reserved-word", "until")) continue;
 
-        indentLine(first, t.col);
+        indentLine(first, t.getCol());
       }
   }  
 
