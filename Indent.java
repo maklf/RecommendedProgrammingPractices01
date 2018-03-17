@@ -347,50 +347,31 @@ public final class Indent {
      * @param token token after which there should be a blank line
      */
     private static void ensureBlankLineAfter(Token token) {
-        Token newToken = null;
-
-        int step;
-
-        if (token.getNext() != null) {
-            for (; token != null && (token.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE; token = token.getNext())
-        ;
-
-            int hlpr = 0;
-            if (token != null && token.getNext() != null) {
-                hlpr = token.getNext().getFlags();
-            }
-
-            step = 1;
-            while (step < 4) {
-
-                if (token != null && token.getNext() != null) {
-                    token.setFlags(token.getFlags() & (token.getNext().getFlags() ^ (~hlpr)));
-                }
-
-                switch (step) {
-                    case 1:
-                        if (token == null || token.getNext() == null) {
-                            return;
-                        }
-                        if ((token.getNext().getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
-                            return;
-                        }
-                        break;
-
-                    case 2:
-                        newToken = new Token("\n", "whitespace",
-                                ((token.getNext().getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE | Token.TF_ENDS_LINE, token.getNext().getRow(), 0, token, token.getNext());
-                        break;
-
-                    case 3:
-                        changeRowUntilEOF(1, token.getNext());
-                        token.getNext().setPrev(newToken);
-                        token.setNext(newToken);
-                        break;
-                }
-                step++;
-            }
+        //Test if next token does not equal null
+        if(token == null || token.getNext() == null) {
+            return;
         }
+        
+        while(token != null && (token.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE) {
+            token = token.getNext();
+        }
+        
+        if (token == null || token.getNext() == null) {
+            return;
+        }
+        
+        int nextFlag = token.getNext().getFlags();
+        token.setFlags(token.getFlags() & (token.getNext().getFlags() ^ (~nextFlag)));
+                        
+        if ((token.getNext().getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
+            return;
+        }
+        Token newToken = new Token("\n", "whitespace", 
+                ((token.getNext().getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE | Token.TF_ENDS_LINE, token.getNext().getRow(), 0, token, token.getNext());
+                
+        changeRowUntilEOF(1, token.getNext());
+        token.getNext().setPrev(newToken);
+        token.setNext(newToken);
     }
 
     /**
