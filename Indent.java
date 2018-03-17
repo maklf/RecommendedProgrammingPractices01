@@ -27,7 +27,7 @@ class Token implements Cloneable {
     /** Text. */
     private String text;
     /** Class. */
-    private String klass;
+    private String className;
     /** Flags. */
     private int flags;
     /** Row where it begins (indexed from 0). */
@@ -54,17 +54,17 @@ class Token implements Cloneable {
     }
 
     /**
-     * @return the klass
+     * @return the className
      */
-    public String getKlass() {
-        return klass;
+    public String getClassName() {
+        return className;
     }
 
     /**
-     * @param klass the klass to set
+     * @param className the className to set
      */
-    public void setKlass(String klass) {
-        this.klass = klass;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     /**
@@ -140,14 +140,14 @@ class Token implements Cloneable {
     /**
      * Does the token match given class and text?
      * 
-     * @param aClass class
-     * @param aText text
+     * @param className class
+     * @param text text
      * @return <code>true</code> if token matches the given class and text;
      *         <code>false</code> if token does not match the given class and text 
      */  
-    boolean match(String aClass, String aText) {
-        return getKlass().equals(aClass) &&
-               getText().equalsIgnoreCase(aText);
+    boolean match(String className, String text) {
+        return getClassName().equals(className) &&
+               getText().equalsIgnoreCase(text);
     }
 
     /**
@@ -155,29 +155,30 @@ class Token implements Cloneable {
      *
      * @return clone of the object
      */
-    public Object clone() {
-        return new Token(getText(), getKlass(), getFlags(), getRow(), getCol(), null, null);
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     /**
      * Creates token according to the given parameters.
      * 
      * @param text text
-     * @param klass class
+     * @param className class
      * @param flags flags
      * @param row row where it begins (indexed from 0)
      * @param col column where it begins (indexed from 0)
      * @param prev reference to the previous token in the linked list
      * @param next reference to the next token in the linked list
      */
-    public Token(String text, String klass, int flags, int row, int col, Token prev, Token next) {
-        this.text  = text;
-        this.klass = klass;
-        this.flags = flags;
-        this.row   = row;
-        this.col   = col;
-        this.prev  = prev;
-        this.next  = next;  
+    public Token(String text, String className, int flags, int row, int col, Token prev, Token next) {
+        this.text      = text;
+        this.className = className;
+        this.flags     = flags;
+        this.row       = row;
+        this.col       = col;
+        this.prev      = prev;
+        this.next      = next;  
     }
 }
 /** Ensures correct indentation. */
@@ -307,7 +308,7 @@ public class Indent {
     Token t;
     for (
       t = start.getNext();
-      t != null && (t.getKlass().equals("whitespace") || t.getKlass().equals("comment"));
+      t != null && (t.getClassName().equals("whitespace") || t.getClassName().equals("comment"));
       t = t.getNext()
     );return t;
   } 
@@ -329,7 +330,7 @@ public class Indent {
     for (
       t = token;
       t != null && 
-           (t.getKlass() != klass || 
+           (t.getClassName() != klass || 
 	    !t.getText().equalsIgnoreCase(text));
       t = t.getNext()
     );return t;
@@ -428,7 +429,7 @@ public class Indent {
 
     result = start;
 
-    if (start.getKlass().equals("whitespace")) {
+    if (start.getClassName().equals("whitespace")) {
       if (( start.getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
         /* do nothing, we are done */
       } else {
@@ -477,14 +478,14 @@ public class Indent {
     
 
     for (token = tokens; token != null; token = token.getNext())
-      if (  token.getKlass().equals("comment")) {
+      if (  token.getClassName().equals("comment")) {
 
         /* First we find out if the comment is standalone */
         boolean isStandalone = true;
         first = token;
         if ((   token.getFlags() & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
           for (t =  token.getPrev(); t != null; t = t.getPrev())
-            if (!t.getKlass().equals("whitespace")) {
+            if (!t.getClassName().equals("whitespace")) {
               isStandalone = false;
               break;
             } else {
@@ -497,7 +498,7 @@ public class Indent {
         if (!isStandalone) continue;
 
         /* Now we find something to which the comment could relate. */
-        for (t = token.getNext(); t != null && (t.getKlass().equals("comment") || t.getKlass().equals("whitespace")); t = t.getNext())
+        for (t = token.getNext(); t != null && (t.getClassName().equals("comment") || t.getClassName().equals("whitespace")); t = t.getNext())
           ;
 
         if (t == null || t.match("reserved-word", "end")
