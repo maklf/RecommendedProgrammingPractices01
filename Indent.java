@@ -280,35 +280,37 @@ public final class Indent {
      * or comment; <code>null</code> if no such token is left in the linked list
      */
     private static Token skipWhitespaceAndComments(Token start) {
-        Token t;
-        for (t = start.getNext();
-                t != null && (t.getClassName().equals("whitespace") || t.getClassName().equals("comment"));
-                t = t.getNext());
+        Token t = start.getNext();
+        while( t != null && (t.getClassName().equals("whitespace") || t.getClassName().equals("comment")) ) 
+        {
+            t = t.getNext();
+        }
         return t;
     }
 
     /**
      * Skips all tokens from <code>token</code> (included) does not have class
-     * <code>klass</code> and text <code>text</code>. Comparing the class of the
+     * <code>className</code> and text <code>text</code>. Comparing the class of the
      * token is here for efficiency, so as not to compare texts all the time.
      * Instead, the classes are compared first and only if the same the texts
      * are compared.
      *
      * @param token token, after which the tokens not corresponding are skipped
-     * @param klass the class of the wanted token
+     * @param className the class of the wanted token
      * @param text text of the wanted token
      * @return the closest token after <code>token</code> (included) with class
      * <code>klass</code> and text <code>text</code>; <code>null</code> if not
      * such token left in the linked list
      */
-    private static Token skipUntil(Token token, String klass, String text) {
-        Token t;
-        for (t = token;
-                t != null
-                && (t.getClassName() != klass
-                || !t.getText().equalsIgnoreCase(text));
-                t = t.getNext());
-        return t;
+    private static Token skipUntil(Token token, String className, String text) {
+        Token t = token;
+        while (t != null
+                && ((t.getClassName() == null ? className != null : !t.getClassName().equals(className))
+                || !t.getText().equalsIgnoreCase(text)))
+        {
+            t = t.getNext();
+        }
+        return t;        
     }
 
     /**
@@ -320,9 +322,7 @@ public final class Indent {
      * @param delta the modification of the value of <code>col</code>
      */
     static void changeColUntilEOL(Token start, int delta) {
-        Token token;
-
-        for (token = start; token != null && token.getRow() == start.getRow(); token = token.getNext()) {
+        for (Token token = start; token != null && token.getRow() == start.getRow(); token = token.getNext()) {
             token.setCol(token.getCol() + delta);
         }
     }
@@ -336,9 +336,7 @@ public final class Indent {
      * @param delta the modification of the value of <code>row</code>
      */
     static void changeRowUntilEOF(int delta, Token start) {
-        Token token;
-
-        for (token = start; token != null; token = token.getNext()) {
+        for (Token token = start; token != null; token = token.getNext()) {
             token.setRow(token.getRow() + delta);
         }
     }
