@@ -1,8 +1,9 @@
 
-import java.util.Stack;
+import java.util.*;
+
 
 /** Token object */
-class Token implements Cloneable {
+class Token implements Cloneable, Iterable<Token> {
     /* Token flags. TF = Token Flag. */
     
     /** Token flag "none". */
@@ -24,8 +25,15 @@ class Token implements Cloneable {
     /** Token flag "allows word wrap". */
     public static final int TF_WRAP_ON          = (1 << 7); 
     /** Token flag "allows inserting blank lines". */
-    public static final int TF_BLANK_LINES_ON   = (1 << 8); 
-    
+    public static final int TF_BLANK_LINES_ON   = (1 << 8);
+
+    /** Token class "virtual-round-bracket */
+    public static final String VIRUTAL_ROUND_BRACKETS = "virtual-round-bracket";
+    /** Token class "whitespace */
+    public static final String WHITESPACE = "whitespace";
+    /** Token class "comment*/
+    public static final String COMMENT = "comment";
+
     
     /** Text. */
     private String text;
@@ -139,7 +147,7 @@ class Token implements Cloneable {
     public void setNext(Token next) {
         this.next = next;
     }
-     
+
     /**
      * Does the token match given class and text?
      * 
@@ -163,6 +171,68 @@ class Token implements Cloneable {
         return super.clone();
     }
 
+
+    /**
+     * Returns iterator with current list item as a head
+     * @return
+     */
+    @Override
+    public Iterator<Token> iterator() {
+        return new ListIterator<Token>() {
+            private int index = 0;
+            private Token cursor = next.prev;
+
+            @Override
+            public boolean hasNext() {
+                return (cursor != null);
+            }
+
+            @Override
+            public Token next() {
+                Token currval = cursor;
+                cursor = cursor.next;
+                return currval;
+
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return (cursor.prev != null);
+            }
+
+            @Override
+            public Token previous() {
+                cursor = cursor.prev;
+                return prev;
+            }
+
+            @Override
+            public int nextIndex() {
+                return ++index;
+            }
+
+            @Override
+            public int previousIndex() {
+                return --index;
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void set(Token token) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void add(Token token) {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
     /**
      * Creates token according to the given parameters.
      * 
@@ -175,20 +245,19 @@ class Token implements Cloneable {
      * @param next reference to the next token in the linked list
      */
     public Token(String text, String className, int flags, int row, int col, Token prev, Token next) {
-        this.text      = text;
+        this.text = text;
         this.className = className;
-        this.flags     = flags;
-        this.row       = row;
-        this.col       = col;
-        this.prev      = prev;
-        this.next      = next;  
+        this.flags = flags;
+        this.row = row;
+        this.col = col;
+        this.prev = prev;
+        this.next = next;
     }
 }
 /**
  * Ensures correct indentation.
  */
 public final class Indent {
-
     /**
      * Returns <code>1</code> or <code>0</code> depending on whether the given
      * indentation type is real or virtual.
@@ -201,7 +270,7 @@ public final class Indent {
      * virtual indentation
      */
     private static int indentLevel(String indentationType) {
-        return !"virtual-round-bracket".equals(indentationType) ? 1 : 0;
+        return !Token.VIRUTAL_ROUND_BRACKETS.equals(indentationType) ? 1 : 0;
     }
 
     /**
@@ -280,12 +349,13 @@ public final class Indent {
      * or comment; <code>null</code> if no such token is left in the linked list
      */
     private static Token skipWhitespaceAndComments(Token start) {
-        Token t = start.getNext();
-        while( t != null && (t.getClassName().equals("whitespace") || t.getClassName().equals("comment")) ) 
-        {
-            t = t.getNext();
+        for (Token t : start.getNext()) {
+            if (!(t.getClassName().equals(Token.WHITESPACE) || t.getClassName().equals(Token.COMMENT))) {
+                return t;
+            }
         }
-        return t;
+
+        return null;
     }
 
     /**
@@ -303,14 +373,13 @@ public final class Indent {
      * such token left in the linked list
      */
     private static Token skipUntil(Token token, String className, String text) {
-        Token t = token;
-        while (t != null
-                && ((t.getClassName() == null ? className != null : !t.getClassName().equals(className))
-                || !t.getText().equalsIgnoreCase(text)))
-        {
-            t = t.getNext();
+        for (Token t : token) {
+            if (!((t.getClassName() == null ? className != null : !t.getClassName().equals(className))
+                    || !t.getText().equalsIgnoreCase(text))) {
+                return t;
+            }
         }
-        return t;        
+        return null;
     }
 
     /**
@@ -322,8 +391,12 @@ public final class Indent {
      * @param delta the modification of the value of <code>col</code>
      */
     static void changeColUntilEOL(Token start, int delta) {
-        for (Token token = start; token != null && token.getRow() == start.getRow(); token = token.getNext()) {
+        for (Token token : start) {
             token.setCol(token.getCol() + delta);
+
+            if(token.getRow() != start.getRow()) {
+                break;
+            }
         }
     }
 
@@ -336,7 +409,7 @@ public final class Indent {
      * @param delta the modification of the value of <code>row</code>
      */
     static void changeRowUntilEOF(int delta, Token start) {
-        for (Token token = start; token != null; token = token.getNext()) {
+        for (Token token : start) {
             token.setRow(token.getRow() + delta);
         }
     }
@@ -351,7 +424,7 @@ public final class Indent {
         if(token == null || token.getNext() == null) {
             return;
         }
-        
+
         while(token != null && (token.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE) {
             token = token.getNext();
         }
@@ -433,7 +506,7 @@ public final class Indent {
      * indented
      */
     static void indentComments(Token tokens) {
-        for(Token t = tokens; t != null; t = t.getNext()) {
+        for(Token t : tokens) {
             if (!t.getClassName().equals("comment")) {
                 continue;
             }
