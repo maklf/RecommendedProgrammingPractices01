@@ -26,6 +26,8 @@ přidáno @Override a volání super.clone().
 Úprava metody "match" třídy Token (změna názvů parametrů metody). Pro zachování
 zpětné kompatibility nebyla metoda celá přejmenována, byť by to bylo vhodné.
 
+Vytvoření konstant tříd tokenů - Comment, Whitespace, Virtual round brackets.
+
 
 # Úpravy třídy Indent (změna struktury, formátování) 
 
@@ -53,6 +55,8 @@ vnitřní logiky.
 
 Zamýšlená (nerealizovaná) změna: odstranění třídy IndentContext - lze ji 
 kompletně nahradit třídou java.util.Stack<String>.
+
+Iterování přes spojový seznam Tokenů pomocí ListIteratoru místo ručního procházení seznamu
 
 
 # Přepsání některých statických metod třídy Indent 
