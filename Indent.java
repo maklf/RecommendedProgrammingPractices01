@@ -379,33 +379,24 @@ public final class Indent {
      * <code>level</code>.
      *
      * @param start first token on the line
-     * @param l level to which the line should be indented
+     * @param level level to which the line should be indented
      * @return token at the beginning of the line after indentation (not
      * necessary the same as <code>start</code>)
      */
-    private static Token indentLine(Token start, int l) {
-        Token newToken, result;
-        String text;
-        int delta = 0;
-
-        result = start;
-
+    private static Token indentLine(Token start, int level) {
         if (start.getClassName().equals("whitespace")) {
-            if ((start.getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
-                /* do nothing, we are done */
-            } else {
-                if (start.getText().length() == l) {
+            if ((start.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE) {
+                if (start.getText().length() == level) {
                     /* do nothing, we are done */
-                } else if (l > 0) {
-                    delta = l - start.getText().length();
+                } else if (level > 0) {
+                    int delta = level - start.getText().length();
                     start.setText("");
-                    for (int i = 1; i <= l; i++) {
+                    for (int i = 1; i <= level; i++) {
                         start.setText(start.getText() + " ");
                     }
                     changeColUntilEOL(start.getNext(), delta);
                 } else {
-                    /*delta = -start.col;*/
-                    delta = -(int) start.getText().length();
+                    int delta = (-1)*start.getText().length();
                     if (start.getPrev() != null) {
                         start.getPrev().setNext(start.getNext());
                     }
@@ -414,27 +405,25 @@ public final class Indent {
                     }
                     start.getNext().setFlags(start.getNext().getFlags() | Token.TF_BEGINS_LINE);
                     changeColUntilEOL(start.getNext(), delta);
-                    result = start.getNext();
+                    return start.getNext();
                 }
             }
-        } else if (l > 0) {
-            text = "";
-            for (int i = 1; i <= l; i++) {
+        } else if (level > 0) {
+            String text = "";
+            for (int i = 1; i <= level; i++) {
                 text += ' ';
             }
-            newToken = new Token(text, "whitespace",
+            Token newToken = new Token(text, "whitespace",
                     ((start.getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE, start.getRow(), start.getCol(), start.getPrev(), start);
-            changeColUntilEOL(start, l);
+            changeColUntilEOL(start, level);
             if (start.getPrev() != null) {
                 start.getPrev().setNext(newToken);
             }
             start.setPrev(newToken);
             start.setFlags(start.getFlags() & ~Token.TF_BEGINS_LINE);
-        } else {
-            /* do nothing, we are done */
         }
 
-        return result;
+        return start;
     }
 
     /**
