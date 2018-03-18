@@ -1,73 +1,87 @@
 # Zapouzdření proměnných ve třídě Token
 
-Zapouzdření stavových proměnných privátní třídy Token: text, klass, flags, row, col, prev, next.
-
+Zapouzdření stavových proměnných privátní třídy Token: text, klass, flags, row,
+col, prev, next.
 
 
 # Změny v pořadí částí třídy Token, odsazení, řádků
 
 Změna odsazení a odstranění nevhodných prázdných řádků ve třídě Token.
 
-Změna pořadí dílčích částí ve třídě Token (dle logiky konstanty, stavové proměnné, metody třídy, konstruktor).
+Změna pořadí dílčích částí ve třídě Token (dle logiky konstanty, stavové 
+proměnné, metody třídy, konstruktor).
 
-Oprava konstanty TF_BEGINS_LINE (resp. zápis ekvivalentní hodnoty zřejmějším způsobem).
-
+Oprava konstanty TF_BEGINS_LINE (resp. zápis ekvivalentní hodnoty zřejmějším 
+způsobem).
 
 
 # Úpravy ve třídě Token (proměnných, clone, match) 
 
-Přejmenování proměnné "klass" třídy Token na "className", tento název je gramaticky správný a odráží lépe význam proměnné).
+Přejmenování proměnné "klass" třídy Token na "className", tento název je 
+gramaticky správný a odráží lépe význam proměnné).
 
-Oprava metody "clone" třídy Token (dle běžných konvencí jazyka Java). Konkrétně přidáno @Override a volání super.clone().
+Oprava metody "clone" třídy Token (dle běžných konvencí jazyka Java). Konkrétně
+přidáno @Override a volání super.clone().
 
-Úprava metody "match" třídy Token (změna názvů parametrů metody). Pro zachování zpětné kompatibility nebyla metoda celá přejmenována, byť by to bylo vhodné.
-
+Úprava metody "match" třídy Token (změna názvů parametrů metody). Pro zachování
+zpětné kompatibility nebyla metoda celá přejmenována, byť by to bylo vhodné.
 
 
 # Úpravy třídy Indent (změna struktury, formátování) 
 
 Oprava formátování třídy Indent (především odsazení).
 
-Třída Indent "nastavena" jako final. Má pouze statické metody, není co rozšiřovat.
+Třída Indent "nastavena" jako final. Má pouze statické metody, není co 
+rozšiřovat.
 
-Úprava metody indentLevel: změna nazvu parametru (nový lépe odráží logiku metody), dále úprava porovnávání řetězců na standardní způsob.
+Úprava metody indentLevel: změna nazvu parametru (nový lépe odráží logiku 
+metody), dále úprava porovnávání řetězců na standardní způsob.
 
-Odstranění třídy IndentLvl. Je nahrazena zásobníkem ze standardních knihoven (java.util.Stack<String>).
+Odstranění třídy IndentLvl. Je nahrazena zásobníkem ze standardních knihoven 
+(java.util.Stack<String>).
 
-Změna vnitřní logiky třídy IndentContext způsobená odstraněním třídy IndentLvl. Především odstranění většiny proměnných třídy a změna metod třídy. 
+Změna vnitřní logiky třídy IndentContext způsobená odstraněním třídy IndentLvl.
+Především odstranění většiny proměnných třídy a změna metod třídy. 
 
 Přejmenování klass metody indent třídy IndentContext. 
 
-Změna vnitřní logiky metod indent, unindent, unindentNext třídy IndentContext dle nové logiky.
+Změna vnitřní logiky metod indent, unindent, unindentNext třídy IndentContext 
+dle nové logiky.
 
-Změna metody topClassIs třídy IndentContext: přejmenování parametrů a změna vnitřní logiky.
+Změna metody topClassIs třídy IndentContext: přejmenování parametrů a změna 
+vnitřní logiky.
 
-Zamýšlená (nerealizovaná) změna: odstranění třídy IndentContext - lze ji kompletně nahradit třídou java.util.Stack<String>.
-
+Zamýšlená (nerealizovaná) změna: odstranění třídy IndentContext - lze ji 
+kompletně nahradit třídou java.util.Stack<String>.
 
 
 # Přepsání některých statických metod třídy Indent 
 
 Přepsání metody skipWhitespaceAndComments třídy Indent na přehlednější variantu.
 
-Přepsání metody skipUntil třídy Indent: změna názvu parametrů a vnitřní logiky (např. komparace Stringů apod.).
+Přepsání metody skipUntil třídy Indent: změna názvu parametrů a vnitřní logiky 
+(např. komparace Stringů apod.).
 
-Modifikace metody changeColUntilEOL a changeRowUntilEOF třídy Indent (drobná změna ve for cyklu).
-
+Modifikace metody changeColUntilEOL a changeRowUntilEOF třídy Indent 
+(drobná změna ve for cyklu).
 
 
 # Přepsání metody ensureBlankLineAfter třídy Indent 
 
-Přepsání metody ensureBlankLineAfter třídy Indent na ekvivalentní a přehlednější variantu.
-
+Přepsání metody ensureBlankLineAfter třídy Indent na ekvivalentní a 
+přehlednější variantu.
 
 
 # Úprava metody indentComments třídy Ident 
 
-Přepsání metody indentComments třídy Indent. Zejména celkové zpřehlednění kódu, minimalizace oboru platnosti používaných proměnných, přejmenování vybraných proměnných, změna posledního for while  (který je v daném případě přehlednější).
-
+Přepsání metody indentComments třídy Indent. Zejména celkové zpřehlednění kódu,
+minimalizace oboru platnosti používaných proměnných, přejmenování vybraných 
+proměnných, změna posledního for while  (který je v daném případě přehlednější).
 
 
 # Úprava metody indentLine třídy Indent 
 
-Úprava vnitřní koncepce metody indentLine třídy Indent. Zejména: přejmenování parametru "l" na "level". Změna vnitřní struktury metody (odstranění přebytečných proměnných, zúžení oboru platnosti proměnných). Změna koncepce if/else statementů, úprava vynásobení záporným číslem (u proměnné delta).
+Úprava vnitřní koncepce metody indentLine třídy Indent. Zejména: přejmenování 
+parametru "l" na "level". Změna vnitřní struktury metody (odstranění 
+přebytečných proměnných, zúžení oboru platnosti proměnných). Změna koncepce 
+if/else statementů, úprava vynásobení záporným číslem (u proměnné delta).
