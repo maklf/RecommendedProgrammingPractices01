@@ -164,6 +164,13 @@ class Token implements Cloneable, Iterable<Token> {
     }
 
     /**
+     * @return this
+     */
+    private Token getInstance() {
+        return this;
+    }
+
+    /**
      * Creates the clone of the object.
      *
      * @return clone of the object
@@ -181,14 +188,29 @@ class Token implements Cloneable, Iterable<Token> {
     @Override
     public Iterator<Token> iterator() {
         return new ListIterator<Token>() {
+            /**
+             * Stores index of current iterator position
+             */
             private int index = 0;
-            private Token cursor = next.prev;
 
+            /**
+             * Cursor variable for maintaining of position of iterator
+             */
+            private Token cursor = getInstance();
+
+            /**
+             * Returns true if there is next item
+             * @return
+             */
             @Override
             public boolean hasNext() {
                 return (cursor != null);
             }
 
+            /**
+             * Goes to the previous item in linked list
+             * @return
+             */
             @Override
             public Token next() {
                 Token currval = cursor;
@@ -197,37 +219,64 @@ class Token implements Cloneable, Iterable<Token> {
 
             }
 
+            /**
+             * Returns true if there is previous item
+             * @return boolean
+             */
             @Override
             public boolean hasPrevious() {
                 return (cursor.prev != null);
             }
 
+            /**
+             * Goes to the previous item in linked list
+             * @return Token
+             */
             @Override
             public Token previous() {
                 cursor = cursor.prev;
                 return prev;
             }
 
+            /**
+             * Counts index of next item in linked list
+             * @return int the index
+             */
             @Override
             public int nextIndex() {
                 return ++index;
             }
 
+            /**
+             * Counts index of previous item in linked list
+             * @return int the index
+             */
             @Override
             public int previousIndex() {
                 return --index;
             }
 
+            /**
+             * Not suppported
+             */
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
 
+            /**
+             * Not suppported
+             * @param token
+             */
             @Override
             public void set(Token token) {
                 throw new UnsupportedOperationException();
             }
 
+            /**
+             * Not suppported
+             * @param Token token
+             */
             @Override
             public void add(Token token) {
                 throw new UnsupportedOperationException();
