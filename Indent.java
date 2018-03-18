@@ -28,11 +28,13 @@ class Token implements Cloneable, Iterable<Token> {
     public static final int TF_BLANK_LINES_ON   = (1 << 8);
 
     /** Token class "virtual-round-bracket */
-    public static final String VIRUTAL_ROUND_BRACKETS = "virtual-round-bracket";
+    public static final String VIRUTAL_ROUND_BRACKETS = "irtual-round-bracket";
     /** Token class "whitespace */
     public static final String WHITESPACE = "whitespace";
     /** Token class "comment*/
     public static final String COMMENT = "comment";
+    /** Token class "reserved word*/
+    public static final String RESERVED_WORD = "reserved-word";
 
     
     /** Text. */
@@ -439,7 +441,7 @@ public final class Indent {
         if ((token.getNext().getFlags() & Token.TF_ENDS_LINE) == Token.TF_ENDS_LINE) {
             return;
         }
-        Token newToken = new Token("\n", "whitespace", 
+        Token newToken = new Token("\n", Token.WHITESPACE,
                 ((token.getNext().getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE | Token.TF_ENDS_LINE, token.getNext().getRow(), 0, token, token.getNext());
                 
         changeRowUntilEOF(1, token.getNext());
@@ -457,7 +459,7 @@ public final class Indent {
      * necessary the same as <code>start</code>)
      */
     private static Token indentLine(Token start, int level) {
-        if (start.getClassName().equals("whitespace")) {
+        if (start.getClassName().equals(Token.WHITESPACE)) {
             if ((start.getFlags() & Token.TF_ENDS_LINE) != Token.TF_ENDS_LINE) {
                 if (start.getText().length() == level) {
                     /* do nothing, we are done */
@@ -486,7 +488,7 @@ public final class Indent {
             for (int i = 1; i <= level; i++) {
                 text += ' ';
             }
-            Token newToken = new Token(text, "whitespace",
+            Token newToken = new Token(text, Token.WHITESPACE,
                     ((start.getFlags() & ~Token.TF_BEGINS_LINE) & ~Token.TF_ENDS_LINE) | Token.TF_BEGINS_LINE, start.getRow(), start.getCol(), start.getPrev(), start);
             changeColUntilEOL(start, level);
             if (start.getPrev() != null) {
@@ -507,7 +509,7 @@ public final class Indent {
      */
     static void indentComments(Token tokens) {
         for(Token t : tokens) {
-            if (!t.getClassName().equals("comment")) {
+            if (!t.getClassName().equals(Token.COMMENT)) {
                 continue;
             }
             boolean isStandalone = true;            
@@ -517,7 +519,7 @@ public final class Indent {
             /* First we find out if the comment is standalone */
             if ((t.getFlags() & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
                 for (Token prev = t.getPrev(); prev != null; prev = t.getPrev()) {
-                    if (!prev.getClassName().equals("whitespace")) {
+                    if (!prev.getClassName().equals(Token.WHITESPACE)) {
                         isStandalone = false;
                         break;
                     } else {
@@ -534,13 +536,13 @@ public final class Indent {
             
             /* Now we find something to which the comment could relate. */
             Token next = t.getNext();
-            while(next != null && (next.getClassName().equals("comment") || next.getClassName().equals("whitespace"))) {
+            while(next != null && (next.getClassName().equals(Token.COMMENT) || next.getClassName().equals(Token.WHITESPACE))) {
                 next = next.getNext();
             }
             
             if (next == null 
-                    || next.match("reserved-word", "end")
-                    || next.match("reserved-word", "until")) {
+                    || next.match(Token.RESERVED_WORD, "end")
+                    || next.match(Token.RESERVED_WORD, "until")) {
                 continue;
             }
 
