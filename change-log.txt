@@ -56,7 +56,8 @@ vnitřní logiky.
 Zamýšlená (nerealizovaná) změna: odstranění třídy IndentContext - lze ji 
 kompletně nahradit třídou java.util.Stack<String>.
 
-Iterování přes spojový seznam Tokenů pomocí ListIteratoru místo ručního procházení seznamu
+Iterování přes spojový seznam Tokenů pomocí ListIteratoru místo ručního
+procházení seznamu
 
 
 # Přepsání některých statických metod třídy Indent 
