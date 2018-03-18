@@ -28,7 +28,7 @@ class Token implements Cloneable, Iterable<Token> {
     public static final int TF_BLANK_LINES_ON   = (1 << 8);
 
     /** Token class "virtual-round-bracket */
-    public static final String VIRUTAL_ROUND_BRACKETS = "irtual-round-bracket";
+    public static final String VIRUTAL_ROUND_BRACKETS = "virtual-round-bracket";
     /** Token class "whitespace */
     public static final String WHITESPACE = "whitespace";
     /** Token class "comment*/
