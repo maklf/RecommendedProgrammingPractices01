@@ -444,43 +444,45 @@ public final class Indent {
      * indented
      */
     static void indentComments(Token tokens) {
-        Token token, t, first;
-
-        for (token = tokens; token != null; token = token.getNext()) {
-            if (token.getClassName().equals("comment")) {
-
-                /* First we find out if the comment is standalone */
-                boolean isStandalone = true;
-                first = token;
-                if ((token.getFlags() & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
-                    for (t = token.getPrev(); t != null; t = t.getPrev()) {
-                        if (!t.getClassName().equals("whitespace")) {
-                            isStandalone = false;
+        for(Token t = tokens; t != null; t = t.getNext()) {
+            if (!t.getClassName().equals("comment")) {
+                continue;
+            }
+            boolean isStandalone = true;            
+            
+            Token first = t;
+            
+            /* First we find out if the comment is standalone */
+            if ((t.getFlags() & Token.TF_BEGINS_LINE) != Token.TF_BEGINS_LINE) {
+                for (Token prev = t.getPrev(); prev != null; prev = t.getPrev()) {
+                    if (!prev.getClassName().equals("whitespace")) {
+                        isStandalone = false;
+                        break;
+                    } else {
+                        if ((prev.getFlags() & Token.TF_BEGINS_LINE) == Token.TF_BEGINS_LINE) {
+                            first = prev;
                             break;
-                        } else {
-                            if ((t.getFlags() & Token.TF_BEGINS_LINE) == Token.TF_BEGINS_LINE) {
-                                first = t;
-                                break;
-                            }
                         }
                     }
                 }
-                if (!isStandalone) {
-                    continue;
-                }
-
-                /* Now we find something to which the comment could relate. */
-                for (t = token.getNext(); t != null && (t.getClassName().equals("comment") || t.getClassName().equals("whitespace")); t = t.getNext())
-          ;
-
-                if (t == null || t.match("reserved-word", "end")
-                        || t.match("reserved-word", "until")) {
-                    continue;
-                }
-
-                indentLine(first, t.getCol());
             }
+            if (!isStandalone) {
+                continue;
+            }
+            
+            /* Now we find something to which the comment could relate. */
+            Token next = t.getNext();
+            while(next != null && (next.getClassName().equals("comment") || next.getClassName().equals("whitespace"))) {
+                next = next.getNext();
+            }
+            
+            if (next == null 
+                    || next.match("reserved-word", "end")
+                    || next.match("reserved-word", "until")) {
+                continue;
+            }
+
+            indentLine(first, next.getCol());
         }
     }
-
 }
